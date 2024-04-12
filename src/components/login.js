@@ -1,58 +1,41 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { submitLogin } from '../actions/authActions';
-import { connect } from 'react-redux';
 import { Form, Button } from 'react-bootstrap';
 
-class Login extends Component {
+const Login = () => {
+    const dispatch = useDispatch();
+    const [details, setDetails] = useState({
+        username: '',
+        password: ''
+    });
 
-    constructor(props) {
-        super(props);
-        this.updateDetails = this.updateDetails.bind(this);
-        this.login = this.login.bind(this);
-
-        this.state = {
-            details:{
-                username: '',
-                password: ''
-            }
-        };
-    }
-
-    updateDetails(event){
-        let updateDetails = Object.assign({}, this.state.details);
-
-        updateDetails[event.target.id] = event.target.value;
-        this.setState({
-            details: updateDetails
+    const updateDetails = event => {
+        setDetails({
+            ...details,
+            [event.target.id]: event.target.value
         });
     }
 
-    login() {
-        const {dispatch} = this.props;
-        dispatch(submitLogin(this.state.details));
+    const login = event => {
+        event.preventDefault();
+        dispatch(submitLogin(details));
     }
 
-    render(){
-        return (
-            <Form className='form-horizontal'>
-                <Form.Group controlId="username">
-                    <Form.Label>Email</Form.Label>
-                    <Form.Control onChange={this.updateDetails} value={this.state.details.username} type="email" placeholder="Enter email" />
-                </Form.Group>
+    return (
+        <Form className='form-horizontal' onSubmit={login}>
+            <Form.Group controlId="username">
+                <Form.Label>Email</Form.Label>
+                <Form.Control onChange={updateDetails} value={details.username} type="email" placeholder="Enter email" />
+            </Form.Group>
 
-                <Form.Group controlId="password">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control onChange={this.updateDetails} value={this.state.details.password}  type="password" placeholder="Password" />
-                </Form.Group>
-                <Button onClick={this.login}>Sign in</Button>
-            </Form>
-        )
-    }
+            <Form.Group controlId="password">
+                <Form.Label>Password</Form.Label>
+                <Form.Control onChange={updateDetails} value={details.password}  type="password" placeholder="Password" />
+            </Form.Group>
+            <Button type="submit">Sign in</Button>
+        </Form>
+    )
 }
 
-const mapStateToProps = state => {
-    return {
-    }
-}
-
-export default connect(mapStateToProps)(Login);
+export default Login;

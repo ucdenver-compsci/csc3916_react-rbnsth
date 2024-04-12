@@ -1,62 +1,40 @@
-import React, { Component} from 'react';
-import { connect } from 'react-redux'
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import Login from './login';
 import Register from './register';
 import { logoutUser } from '../actions/authActions';
 
-class Authentication extends Component {
+const Authentication = () => {
+    const dispatch = useDispatch();
+    const loggedIn = useSelector(state => state.auth.loggedIn);
+    const username = useSelector(state => state.auth.username);
+    const [toggleReg, setToggleReg] = useState(false);
 
-    constructor(){
-        super();
-
-        this.state = {
-            toggleReg: false
-        };
+    const showLogin = () => {
+        setToggleReg(false);
     }
 
-    componentDidMount(){
-
+    const showReg = () => {
+        setToggleReg(true);
     }
 
-    showLogin(){
-        this.setState({
-            toggleReg: false
-        });
+    const logout = () => {
+        dispatch(logoutUser());
     }
 
-    showReg(){
-        this.setState({
-            toggleReg: true
-        });
-    }
+    const userNotLoggedIn = (
+        <div>
+            <button onClick={showLogin}>Login</button><button onClick={showReg}>Register</button>
+            { toggleReg ? <Register /> : <Login /> }
+        </div>
+    );
+    const userLoggedIn = (<div>Logged in as: {username} <button onClick={logout}>Logout</button></div>);
 
-    logout(){
-        this.props.dispatch(logoutUser());
-    }
-
-    render(){
-
-        const userNotLoggedIn = (
-            <div>
-                <button onClick={this.showLogin.bind(this)}>Login</button><button onClick={this.showReg.bind(this)}>Register</button>
-                { this.state.toggleReg ? <Register /> : <Login /> }
-            </div>
-        );
-        const userLoggedIn = (<div>Logged in as: {this.props.username} <button onClick={this.logout.bind(this)}>Logout</button></div>);
-
-        return (
-            <div>
-                {this.props.loggedIn ? userLoggedIn : userNotLoggedIn}
-            </div>
-        )
-    }
+    return (
+        <div>
+            {loggedIn ? userLoggedIn : userNotLoggedIn}
+        </div>
+    )
 }
 
-const mapStateToProps = state => {
-    return {
-        loggedIn: state.auth.loggedIn,
-        username: state.auth.username
-    }
-}
-
-export default connect(mapStateToProps)(Authentication)
+export default Authentication;
