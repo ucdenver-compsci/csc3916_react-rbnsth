@@ -34,24 +34,34 @@ export function setMovie(movie) {
     }
 }
 
-export function fetchMovie(movieId) {
+export function fetchMovie(movieIdOrTitle) {
+    // Determine if the input is a number (ID) or a string (title)
+    const isId = !isNaN(movieIdOrTitle);
+    const url = isId
+        ? `${process.env.REACT_APP_API_URL}/movies/${movieIdOrTitle}?reviews=true`
+        : `${process.env.REACT_APP_API_URL}/movies?title=${movieIdOrTitle}&reviews=true`;
+
     return dispatch => {
-        return fetch(`${process.env.REACT_APP_API_URL}/movies/${movieId}?reviews=false`, {
+        return fetch(url, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': sessionStorage.getItem('token')
-            },
-            mode: 'cors'
-        }).then((response) => {
-            if (!response.ok) {
-                throw Error(response.statusText);
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
             }
-            return response.json()
-        }).then((res) => {
-            dispatch(movieFetched(res));
-        }).catch((e) => dispatch(fetchError(e)));
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                dispatch(movieFetched(data));
+            })
+            .catch(error => {
+                dispatch(fetchError(error));
+            });
     }
 }
 
