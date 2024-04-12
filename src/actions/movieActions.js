@@ -1,6 +1,4 @@
 import actionTypes from '../constants/actionTypes';
-//import runtimeEnv from '@mars/heroku-js-runtime-env'
-const env = process.env;
 
 function moviesFetched(movies) {
     return {
@@ -23,6 +21,13 @@ function movieSet(movie) {
     }
 }
 
+function fetchError(error) {
+    return {
+        type: actionTypes.FETCH_ERROR,
+        error: error
+    }
+}
+
 export function setMovie(movie) {
     return dispatch => {
         dispatch(movieSet(movie));
@@ -31,12 +36,12 @@ export function setMovie(movie) {
 
 export function fetchMovie(movieId) {
     return dispatch => {
-        return fetch(`${env.REACT_APP_API_URL}/movies/${movieId}?reviews=true`, {
+        return fetch(`${process.env.REACT_APP_API_URL}/movies/${movieId}?reviews=false`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
+                'Authorization': sessionStorage.getItem('token')
             },
             mode: 'cors'
         }).then((response) => {
@@ -46,18 +51,18 @@ export function fetchMovie(movieId) {
             return response.json()
         }).then((res) => {
             dispatch(movieFetched(res));
-        }).catch((e) => console.log(e));
+        }).catch((e) => dispatch(fetchError(e)));
     }
 }
 
 export function fetchMovies() {
     return dispatch => {
-        return fetch(`${env.REACT_APP_API_URL}/movies?reviews=true`, {
+        return fetch(`${process.env.REACT_APP_API_URL}/movies?reviews=false`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
+                'Authorization': sessionStorage.getItem('token')
             },
             mode: 'cors'
         }).then((response) => {
@@ -67,6 +72,6 @@ export function fetchMovies() {
             return response.json()
         }).then((res) => {
             dispatch(moviesFetched(res));
-        }).catch((e) => console.log(e));
+        }).catch((e) => dispatch(fetchError(e)));
     }
 }
